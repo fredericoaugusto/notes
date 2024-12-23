@@ -8,11 +8,11 @@ class AuthController extends Controller
 {
     public function login()
     {
-        echo "Login page";
+        return view('login');
     }
 
     public function logout()
     {
-        echo "Logout page";
+        return view('logout');
     }
 }
