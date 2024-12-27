@@ -53,7 +53,7 @@ class AuthController extends Controller
             ]
         ]);
 
-        echo 'Login efetuado com sucesso';
+        return redirect('/');
     }
     public function logout()
     {
