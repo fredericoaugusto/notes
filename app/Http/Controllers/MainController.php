@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Note;
 use App\Models\User;
 use App\Services\Operations;
+use Carbon\Traits\Date;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
@@ -15,7 +16,11 @@ class MainController extends Controller
     {
         $id = session('user.id');
         $user = User::find($id);
-        $notes = User::find($id)->notes()->get()->toArray();
+        $notes = User::find($id)
+                ->notes()
+                ->whereNull('deleted_at')
+                ->get()
+                ->toArray();
 
         return view('home', ['notes' => $notes, 'user' => $user]);
     }
@@ -55,6 +60,10 @@ class MainController extends Controller
     {
         $id = Operations::decryptId($id);
 
+        if ($id === null) {
+            return redirect()->route('home');
+        }
+
         $note = Note::find($id);
 
         return view('edit_note', ['note' => $note]);
@@ -82,6 +91,10 @@ class MainController extends Controller
 
         $id = Operations::decryptId($request->note_id);
 
+        if ($id === null) {
+            return redirect()->route('home');
+        }
+
         $note = Note::find($id);
 
         $note->title = $request->text_title;
@@ -95,6 +108,27 @@ class MainController extends Controller
     {
         $id = Operations::decryptId($id);
 
-        echo 'Deletar nota ' . $id;
+        if ($id === null) {
+            return redirect()->route('home');
+        }
+
+        $note = Note::find($id);
+
+        return view('delete_note', ['note' => $note]);
+    }
+
+    public function deleteNoteConfirm($id)
+    {
+        $id = Operations::decryptId($id);
+
+        if ($id === null) {
+            return redirect()->route('home');
+        }
+
+        $note = Note::find($id);
+
+        $note->delete();
+
+        return redirect()->route('home');
     }
 }
